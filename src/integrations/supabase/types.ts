@@ -104,6 +104,45 @@ export type Database = {
         }
         Relationships: []
       }
+      punchloc: {
+        Row: {
+          created_at: string | null
+          device_info: string | null
+          id: string
+          latitude: number
+          location_address: string | null
+          longitude: number
+          punch_type: string
+          punched_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          latitude: number
+          location_address?: string | null
+          longitude: number
+          punch_type: string
+          punched_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          latitude?: number
+          location_address?: string | null
+          longitude?: number
+          punch_type?: string
+          punched_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_by: string
