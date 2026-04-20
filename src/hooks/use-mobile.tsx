@@ -21,13 +21,18 @@ export function useIsMobile() {
 
     setIsMobile(mql.matches);
 
-    if ("addEventListener" in mql) {
+    if (typeof mql.addEventListener === "function") {
       mql.addEventListener("change", onChange);
       return () => mql.removeEventListener("change", onChange);
     }
 
-    mql.addListener(onChange);
-    return () => mql.removeListener(onChange);
+    // Fallback for legacy Safari
+    const legacyMql = mql as MediaQueryList & {
+      addListener: (cb: (e: MediaQueryListEvent) => void) => void;
+      removeListener: (cb: (e: MediaQueryListEvent) => void) => void;
+    };
+    legacyMql.addListener(onChange);
+    return () => legacyMql.removeListener(onChange);
   }, []);
 
   return isMobile;
