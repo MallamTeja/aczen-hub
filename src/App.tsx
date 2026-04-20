@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Uploads from "./pages/Uploads";
 import Assignments from "./pages/Assignments";
 import Calendar from "./pages/Calendar";
+import CompanyCalendar from "./pages/CompanyCalendar";
+import Leaves from "./pages/Leaves";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -45,6 +47,8 @@ const App = () => (
             <Route path="/cofaczen/create-assignment" element={<CreateAssignment />} />
             <Route path="/assignments" element={<ProtectedRoute><Assignments /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+            <Route path="/company-calendar" element={<ProtectedRoute><CompanyCalendar /></ProtectedRoute>} />
+            <Route path="/leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/email" element={<ProtectedRoute><Email /></ProtectedRoute>} />
             <Route path="/login/*" element={<Login />} />
