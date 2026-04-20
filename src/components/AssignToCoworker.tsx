@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { createNotification } from "@/hooks/useNotifications";
 import { AlertCircle, Plus } from "lucide-react";
 
 interface UserOption {
@@ -140,6 +141,15 @@ export default function AssignToCoworker() {
         setError(`Failed to assign task: ${insertError.message}`);
         return;
       }
+
+      // Notify the assignee
+      await createNotification({
+        clerkUserId: formData.assigned_to,
+        title: "New task assigned",
+        message: `${user?.fullName || "Someone"} assigned you "${formData.title}" — due ${formData.due_date}.`,
+        type: "task",
+        link: "/assignments",
+      });
 
       setSuccess(true);
       setFormData({
