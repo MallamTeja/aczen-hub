@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { createNotification } from "@/hooks/useNotifications";
 import { AlertCircle, Plus } from "lucide-react";
 
 interface UserOption {
@@ -141,6 +142,15 @@ export default function AssignToCoworker() {
         return;
       }
 
+      // Notify the assignee
+      await createNotification({
+        clerkUserId: formData.assigned_to,
+        title: "New task assigned",
+        message: `${user?.fullName || "Someone"} assigned you "${formData.title}" — due ${formData.due_date}.`,
+        type: "task",
+        link: "/assignments",
+      });
+
       setSuccess(true);
       setFormData({
         title: "",
@@ -187,7 +197,7 @@ export default function AssignToCoworker() {
         )}
 
         {success && (
-          <Alert className="bg-green-50 border-green-200 text-green-900">
+          <Alert className="border-success/30 bg-success/10 text-success-foreground">
             <AlertDescription>
               Task assigned successfully!
             </AlertDescription>
