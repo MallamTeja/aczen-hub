@@ -197,7 +197,7 @@ export default function AssignToCoworker() {
         )}
 
         {success && (
-          <Alert className="bg-green-50 border-green-200 text-green-900">
+          <Alert className="border-success/30 bg-success/10 text-success-foreground">
             <AlertDescription>
               Task assigned successfully!
             </AlertDescription>
