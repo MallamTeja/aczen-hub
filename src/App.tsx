@@ -20,6 +20,7 @@ import Chat from "./pages/Chat";
 import Email from "./pages/Email";
 import CRM from "./pages/CRM";
 import Social from "./pages/Social";
+import AI from "./pages/AI";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/uploads" element={<ProtectedRoute><Uploads /></ProtectedRoute>} />
             <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
             <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
+            <Route path="/ai" element={<ProtectedRoute><AI /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

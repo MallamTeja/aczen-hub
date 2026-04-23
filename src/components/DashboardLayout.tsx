@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Zap } from "lucide-react";
+import { Bot, CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ const navItems = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
   { label: "CRM", path: "/crm", icon: Target },
   { label: "Social", path: "/social", icon: Megaphone },
+  { label: "AI", path: "/ai", icon: Bot },
   { label: "Assignments", path: "/assignments", icon: ListTodo },
   { label: "My Calendar", path: "/calendar", icon: CalendarDays },
   { label: "Company", path: "/company-calendar", icon: CalendarRange },
