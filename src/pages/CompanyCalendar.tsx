@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@/contexts/AuthContext";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, addMonths, subMonths, parseISO, isWithinInterval } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, MapPin, Calendar as CalendarIcon, Trash2, Users } from "lucide-react";
 

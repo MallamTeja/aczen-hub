@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@/contexts/AuthContext";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import {
   Calendar as CalendarIcon,

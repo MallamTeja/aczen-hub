@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AppNotification {

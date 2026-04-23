@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Menu, MessageSquare, PalmtreeIcon, Upload, Zap } from "lucide-react";
+import { CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import NotificationBell from "@/components/NotificationBell";
 
 const navItems = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
+  { label: "CRM", path: "/crm", icon: Target },
+  { label: "Social", path: "/social", icon: Megaphone },
   { label: "Assignments", path: "/assignments", icon: ListTodo },
   { label: "My Calendar", path: "/calendar", icon: CalendarDays },
   { label: "Company", path: "/company-calendar", icon: CalendarRange },
@@ -20,8 +22,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { signOut } = useClerk();
-  const { user } = useUser();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -84,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               variant="ghost"
               size="sm"
               className="w-full justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              onClick={() => signOut(() => navigate("/login"))}
+              onClick={() => signOut().then(() => navigate("/login"))}
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
@@ -178,7 +179,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Button
                 variant="secondary"
                 className="w-full justify-center gap-2"
-                onClick={() => signOut(() => navigate("/login"))}
+                onClick={() => signOut().then(() => navigate("/login"))}
               >
                 <LogOut className="h-4 w-4" />
                 Sign out

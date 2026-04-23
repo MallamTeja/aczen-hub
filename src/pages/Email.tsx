@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@/contexts/AuthContext";
 import { ChevronLeft, Mail, MapPin, Reply, Send, Tag, Users } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";

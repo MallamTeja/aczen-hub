@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,28 +15,40 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("adminSession");
+      if (raw && JSON.parse(raw)?.loggedIn) {
+        navigate("/cofaczen", { replace: true });
+      }
+    } catch {
+      // ignore
+    }
+  }, [navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
+    setLoading(true);
 
-    // Simulate a small delay for UX
     setTimeout(() => {
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        // Store admin session in localStorage
-        localStorage.setItem("adminSession", JSON.stringify({
-          email,
-          loggedIn: true,
-          loginTime: new Date().toISOString(),
-        }));
-        navigate("/cofaczen");
+        localStorage.setItem(
+          "adminSession",
+          JSON.stringify({
+            email,
+            loggedIn: true,
+            loginTime: new Date().toISOString(),
+          })
+        );
+        navigate("/cofaczen", { replace: true });
       } else {
         setError("Invalid email or password. Please try again.");
       }
-      setIsLoading(false);
-    }, 500);
+      setLoading(false);
+    }, 300);
   };
 
   return (
@@ -52,7 +64,7 @@ export default function AdminLogin() {
         <div className="bg-card border border-border rounded-lg shadow-lg p-8">
           <h2 className="text-xl font-bold text-foreground mb-2">Admin Access</h2>
           <p className="text-sm text-muted-foreground mb-6">
-            Sign in to access the admin dashboard
+            Sign in to access the admin dashboard.
           </p>
 
           {error && (
@@ -70,12 +82,11 @@ export default function AdminLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="core@acze.tech"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                className="w-full"
+                disabled={loading}
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -86,25 +97,18 @@ export default function AdminLogin() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className="w-full"
+                disabled={loading}
                 required
+                autoComplete="current-password"
               />
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? "Signing in..." : "Sign In"}
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-
-          <div className="mt-6 p-4 bg-muted/50 border border-border rounded text-xs text-muted-foreground">
-            <p className="font-semibold mb-2">Demo Credentials:</p>
-            <p>Email: core@acze.tech</p>
-            <p>Password: Aczen@0402</p>
-          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Uploads from "./pages/Uploads";
 import Assignments from "./pages/Assignments";
@@ -18,24 +18,40 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CreateAssignment from "./pages/CreateAssignment";
 import Chat from "./pages/Chat";
 import Email from "./pages/Email";
+import CRM from "./pages/CRM";
+import Social from "./pages/Social";
 
 const queryClient = new QueryClient();
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function Loading() {
   return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
+    <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      Loading…
+    </div>
   );
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <Loading />;
+  if (!isSignedIn) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  let isAdminSession = false;
+  try {
+    const raw = localStorage.getItem("adminSession");
+    isAdminSession = !!(raw && JSON.parse(raw)?.loggedIn);
+  } catch {
+    isAdminSession = false;
+  }
+  if (!isAdminSession) return <Navigate to="/admin-login" replace />;
+  return <>{children}</>;
+}
+
 const App = () => (
-  <ClerkProvider publishableKey={clerkPubKey} afterSignOutUrl="/login">
+  <AuthProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -43,24 +59,26 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/cofaczen" element={<AdminDashboard />} />
-            <Route path="/cofaczen/create-assignment" element={<CreateAssignment />} />
+            <Route path="/cofaczen" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/cofaczen/create-assignment" element={<AdminRoute><CreateAssignment /></AdminRoute>} />
             <Route path="/assignments" element={<ProtectedRoute><Assignments /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
             <Route path="/company-calendar" element={<ProtectedRoute><CompanyCalendar /></ProtectedRoute>} />
             <Route path="/leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/email" element={<ProtectedRoute><Email /></ProtectedRoute>} />
-            <Route path="/login/*" element={<Login />} />
-            <Route path="/signup/*" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/uploads" element={<ProtectedRoute><Uploads /></ProtectedRoute>} />
+            <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+            <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
-  </ClerkProvider>
+  </AuthProvider>
 );
 
 export default App;

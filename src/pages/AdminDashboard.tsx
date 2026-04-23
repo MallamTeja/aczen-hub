@@ -61,19 +61,10 @@ export default function AdminDashboard() {
   const [viewMode, setViewMode] = useState<"users" | "punches">("users");
 
   useEffect(() => {
-    // Check if admin is logged in
-    const adminSession = localStorage.getItem("adminSession");
-    if (!adminSession) {
-      navigate("/admin-login");
-      return;
-    }
-
     fetchDashboardData();
-
-    // Refresh data every 30 seconds
     const interval = setInterval(fetchDashboardData, 30000);
     return () => clearInterval(interval);
-  }, [navigate]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
