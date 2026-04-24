@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Search, Users, RotateCw, Plus, Mail } from "lucide-react";
+import { LogOut, Search, Users, RotateCw, Plus, Mail, ClipboardList, Clock, Target, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import UserOverviewCards from "@/components/admin/UserOverviewCards";
 import TasksTable from "@/components/admin/TasksTable";
@@ -11,6 +11,8 @@ import ManageUsersDialog from "@/components/admin/ManageUsersDialog";
 import PunchesTable from "@/components/admin/PunchesTable";
 import WeeklySummary from "@/components/admin/WeeklySummary";
 import ActivityFeed from "@/components/admin/ActivityFeed";
+import AdminCRMView from "@/components/admin/AdminCRMView";
+import AdminSocialView from "@/components/admin/AdminSocialView";
 
 interface Task {
   id: string;
@@ -58,7 +60,7 @@ export default function AdminDashboard() {
   const [selectedPriority, setSelectedPriority] = useState<string>("");
   const [selectedUserDetail, setSelectedUserDetail] = useState<string | null>(null);
   const [manageUsersOpen, setManageUsersOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"users" | "punches">("users");
+  const [viewMode, setViewMode] = useState<"users" | "punches" | "crm" | "social">("users");
 
   useEffect(() => {
     fetchDashboardData();
@@ -352,20 +354,42 @@ export default function AdminDashboard() {
 
         {/* View Mode Toggle */}
         {!selectedUserDetail && (
-          <div className="mb-6 flex gap-2">
+          <div className="mb-6 flex flex-wrap gap-2">
             <Button
               variant={viewMode === "users" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("users")}
+              className="gap-2"
             >
+              <ClipboardList className="h-4 w-4" />
               Users & Tasks
             </Button>
             <Button
               variant={viewMode === "punches" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("punches")}
+              className="gap-2"
             >
+              <Clock className="h-4 w-4" />
               Punch Records
+            </Button>
+            <Button
+              variant={viewMode === "crm" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("crm")}
+              className="gap-2"
+            >
+              <Target className="h-4 w-4" />
+              CRM
+            </Button>
+            <Button
+              variant={viewMode === "social" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("social")}
+              className="gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              Social Media
             </Button>
           </div>
         )}
@@ -403,6 +427,26 @@ export default function AdminDashboard() {
           <PunchesTable
             punches={punches}
             loading={loading}
+            userNames={userStats.reduce(
+              (acc, u) => ({ ...acc, [u.id]: u.name }),
+              {}
+            )}
+          />
+        )}
+
+        {/* CRM View */}
+        {viewMode === "crm" && !selectedUserDetail && (
+          <AdminCRMView
+            userNames={userStats.reduce(
+              (acc, u) => ({ ...acc, [u.id]: u.name }),
+              {}
+            )}
+          />
+        )}
+
+        {/* Social View */}
+        {viewMode === "social" && !selectedUserDetail && (
+          <AdminSocialView
             userNames={userStats.reduce(
               (acc, u) => ({ ...acc, [u.id]: u.name }),
               {}
