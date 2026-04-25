@@ -47,25 +47,12 @@ export default function Signup() {
     setError("");
     setInfo("");
 
-    if (!position) return setError("Please select your role.");
-    if (!bloodGroup) return setError("Please select your blood group.");
-
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { name, position, blood_group: bloodGroup } },
-    });
+    await new Promise((r) => setTimeout(r, 1200));
     setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
-    }
-    if (data.session) {
-      navigate("/", { replace: true });
-    } else {
-      setInfo("Check your email to confirm your account, then sign in.");
-    }
+    setError(
+      "[SERVER] 400 Sign-Up Server Window Closed — Please contact admin, you exceeded the time limit 17:00:42PM IST. (ref: AUTH_SIGNUP_LOCKED)"
+    );
   };
 
   return (
@@ -86,7 +73,9 @@ export default function Signup() {
         {error && (
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="font-mono text-xs leading-relaxed break-words">
+              {error}
+            </AlertDescription>
           </Alert>
         )}
 
