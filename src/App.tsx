@@ -21,6 +21,7 @@ import Email from "./pages/Email";
 import CRM from "./pages/CRM";
 import Social from "./pages/Social";
 import AI from "./pages/AI";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
             <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
             <Route path="/ai" element={<ProtectedRoute><AI /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

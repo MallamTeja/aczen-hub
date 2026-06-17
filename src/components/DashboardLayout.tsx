@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Zap } from "lucide-react";
+import { Bot, CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Zap, Headset } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ const navItems = [
   { label: "Chat", path: "/chat", icon: MessageSquare },
   { label: "Email", path: "/email", icon: Mail },
   { label: "Uploads", path: "/uploads", icon: Upload },
+  { label: "Support", path: "/support", icon: Headset },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx supabase *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(grep -n \"^      [a-z_]\\\\+: {$\" \"C:\\\\Users\\\\54712\\\\Downloads\\\\aczen-hub-1\\\\src\\\\integrations\\\\supabase\\\\types.ts\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

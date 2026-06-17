@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -38,36 +38,308 @@ export type Database = {
         }
         Relationships: []
       }
+      company_events: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string
+          event_type: string
+          id: string
+          location: string | null
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_lead_activities: {
+        Row: {
+          actor_name: string | null
+          actor_user_id: string
+          body: string | null
+          created_at: string
+          from_stage: string | null
+          id: string
+          lead_id: string
+          title: string
+          to_stage: string | null
+          type: string
+        }
+        Insert: {
+          actor_name?: string | null
+          actor_user_id: string
+          body?: string | null
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          lead_id: string
+          title: string
+          to_stage?: string | null
+          type: string
+        }
+        Update: {
+          actor_name?: string | null
+          actor_user_id?: string
+          body?: string | null
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          lead_id?: string
+          title?: string
+          to_stage?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          company: string | null
+          created_at: string
+          created_by: string
+          currency: string
+          email: string | null
+          expected_close: string | null
+          id: string
+          job_title: string | null
+          last_contacted_at: string | null
+          name: string
+          notes: string | null
+          owner_name: string | null
+          owner_user_id: string | null
+          phone: string | null
+          probability: number
+          source: string | null
+          stage: string
+          tags: string[]
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          created_by: string
+          currency?: string
+          email?: string | null
+          expected_close?: string | null
+          id?: string
+          job_title?: string | null
+          last_contacted_at?: string | null
+          name: string
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          phone?: string | null
+          probability?: number
+          source?: string | null
+          stage?: string
+          tags?: string[]
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          email?: string | null
+          expected_close?: string | null
+          id?: string
+          job_title?: string | null
+          last_contacted_at?: string | null
+          name?: string
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          phone?: string | null
+          probability?: number
+          source?: string | null
+          stage?: string
+          tags?: string[]
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
       lead_uploads: {
         Row: {
           clerk_user_id: string
           created_at: string
           file_name: string
           id: string
-          lead_source: string
+          lead_source: string | null
           total_leads: number
           upload_date: string
-          uploaded_by: string
+          uploaded_by: string | null
         }
         Insert: {
           clerk_user_id: string
           created_at?: string
           file_name: string
           id?: string
-          lead_source: string
+          lead_source?: string | null
           total_leads?: number
           upload_date?: string
-          uploaded_by: string
+          uploaded_by?: string | null
         }
         Update: {
           clerk_user_id?: string
           created_at?: string
           file_name?: string
           id?: string
-          lead_source?: string
+          lead_source?: string | null
           total_leads?: number
           upload_date?: string
-          uploaded_by?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      leave_balances: {
+        Row: {
+          clerk_user_id: string
+          id: string
+          leave_type: string
+          total_allowed: number
+          updated_at: string
+          used: number
+          year: number
+        }
+        Insert: {
+          clerk_user_id: string
+          id?: string
+          leave_type: string
+          total_allowed?: number
+          updated_at?: string
+          used?: number
+          year?: number
+        }
+        Update: {
+          clerk_user_id?: string
+          id?: string
+          leave_type?: string
+          total_allowed?: number
+          updated_at?: string
+          used?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      leave_requests: {
+        Row: {
+          clerk_user_id: string
+          created_at: string
+          end_date: string
+          id: string
+          leave_type: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_note: string | null
+          start_date: string
+          status: string
+          total_days: number
+          updated_at: string
+        }
+        Insert: {
+          clerk_user_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          leave_type: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_note?: string | null
+          start_date: string
+          status?: string
+          total_days?: number
+          updated_at?: string
+        }
+        Update: {
+          clerk_user_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_note?: string | null
+          start_date?: string
+          status?: string
+          total_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          clerk_user_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          metadata: Json | null
+          title: string
+          type: string
+        }
+        Insert: {
+          clerk_user_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          metadata?: Json | null
+          title: string
+          type?: string
+        }
+        Update: {
+          clerk_user_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          metadata?: Json | null
+          title?: string
+          type?: string
         }
         Relationships: []
       }
@@ -104,42 +376,99 @@ export type Database = {
         }
         Relationships: []
       }
-      punchloc: {
+      social_accounts: {
         Row: {
-          created_at: string | null
-          device_info: string | null
+          avatar_url: string | null
+          connected_by: string
+          created_at: string
+          display_name: string | null
+          handle: string
           id: string
-          latitude: number
-          location_address: string | null
-          longitude: number
-          punch_type: string
-          punched_at: string | null
-          updated_at: string | null
-          user_id: string
+          is_active: boolean
+          platform: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          device_info?: string | null
+          avatar_url?: string | null
+          connected_by: string
+          created_at?: string
+          display_name?: string | null
+          handle: string
           id?: string
-          latitude: number
-          location_address?: string | null
-          longitude: number
-          punch_type: string
-          punched_at?: string | null
-          updated_at?: string | null
-          user_id: string
+          is_active?: boolean
+          platform: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          device_info?: string | null
+          avatar_url?: string | null
+          connected_by?: string
+          created_at?: string
+          display_name?: string | null
+          handle?: string
           id?: string
-          latitude?: number
-          location_address?: string | null
-          longitude?: number
-          punch_type?: string
-          punched_at?: string | null
-          updated_at?: string | null
-          user_id?: string
+          is_active?: boolean
+          platform?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_posts: {
+        Row: {
+          author_name: string | null
+          author_user_id: string
+          campaign: string | null
+          content: string
+          created_at: string
+          engagement: Json
+          id: string
+          link_url: string | null
+          media_urls: string[]
+          notes: string | null
+          platforms: string[]
+          published_at: string | null
+          scheduled_at: string | null
+          status: string
+          tags: string[]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          author_user_id: string
+          campaign?: string | null
+          content: string
+          created_at?: string
+          engagement?: Json
+          id?: string
+          link_url?: string | null
+          media_urls?: string[]
+          notes?: string | null
+          platforms?: string[]
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tags?: string[]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          author_user_id?: string
+          campaign?: string | null
+          content?: string
+          created_at?: string
+          engagement?: Json
+          id?: string
+          link_url?: string | null
+          media_urls?: string[]
+          notes?: string | null
+          platforms?: string[]
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tags?: string[]
+          title?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -151,7 +480,7 @@ export type Database = {
           description: string | null
           due_date: string
           id: string
-          last_activity: string | null
+          last_activity: string
           priority: string
           remarks: string | null
           status: string
@@ -165,7 +494,7 @@ export type Database = {
           description?: string | null
           due_date: string
           id?: string
-          last_activity?: string | null
+          last_activity?: string
           priority?: string
           remarks?: string | null
           status?: string
@@ -179,7 +508,7 @@ export type Database = {
           description?: string | null
           due_date?: string
           id?: string
-          last_activity?: string | null
+          last_activity?: string
           priority?: string
           remarks?: string | null
           status?: string
@@ -250,25 +579,40 @@ export type Database = {
       }
       user_profiles: {
         Row: {
+          auth_user_id: string | null
+          blood_group: string | null
           clerk_user_id: string
           created_at: string
-          email: string | null
+          email: string
           id: string
           name: string
+          position: string | null
+          role: string
+          updated_at: string
         }
         Insert: {
+          auth_user_id?: string | null
+          blood_group?: string | null
           clerk_user_id: string
           created_at?: string
-          email?: string | null
-          id?: string
-          name: string
-        }
-        Update: {
-          clerk_user_id?: string
-          created_at?: string
-          email?: string | null
+          email: string
           id?: string
           name?: string
+          position?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string | null
+          blood_group?: string | null
+          clerk_user_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          position?: string | null
+          role?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -333,6 +677,7 @@ export type Database = {
           title: string
         }[]
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
