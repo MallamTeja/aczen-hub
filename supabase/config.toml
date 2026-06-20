@@ -1,1 +1,10 @@
-project_id = "amzbdzylrxtbspvakwkr"
+project_id = "vrekigsesnqdhexflbcj"
+
+# Outreach automation Edge Functions are triggered internally by pg_cron, not by
+# end users, so JWT verification is disabled; they are protected by the
+# x-cron-secret header (CRON_SECRET) instead.
+[functions.outreach-process]
+verify_jwt = false
+
+[functions.poll-replies]
+verify_jwt = false
