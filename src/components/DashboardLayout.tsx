@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bot, CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Zap, Headset } from "lucide-react";
+import { Bot, CalendarDays, CalendarRange, LayoutDashboard, ListTodo, LogOut, Mail, Megaphone, Menu, MessageSquare, PalmtreeIcon, Target, Upload, Workflow, Zap, Headset } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import NotificationBell from "@/components/NotificationBell";
 const navItems = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
   { label: "CRM", path: "/crm", icon: Target },
+  { label: "Automations", path: "/automations", icon: Workflow },
   { label: "Social", path: "/social", icon: Megaphone },
   { label: "AI", path: "/ai", icon: Bot },
   { label: "Assignments", path: "/assignments", icon: ListTodo },

@@ -22,6 +22,7 @@ import CRM from "./pages/CRM";
 import Social from "./pages/Social";
 import AI from "./pages/AI";
 import Support from "./pages/Support";
+import Automations from "./pages/Automations";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/uploads" element={<ProtectedRoute><Uploads /></ProtectedRoute>} />
             <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+            <Route path="/automations" element={<ProtectedRoute><Automations /></ProtectedRoute>} />
             <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
             <Route path="/ai" element={<ProtectedRoute><AI /></ProtectedRoute>} />
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
