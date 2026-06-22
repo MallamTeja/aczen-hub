@@ -3,7 +3,7 @@
 // by reply monitoring. All secrets come from env (ZOHO_* — same names as .env).
 const ACCOUNTS_BASE = "https://accounts.zoho.in";
 const MAIL_BASE = "https://mail.zoho.in";
-const FROM_ADDRESS = "team@aczen.in";
+const FROM_ADDRESS = "Aczen <team@aczen.in>";
 
 function env(name: string): string {
   const v = Deno.env.get(name);
