@@ -30,6 +30,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   AUTOMATION_LANGUAGES,
   AUTOMATION_STATUSES,
   STATUS_META,
@@ -67,6 +77,14 @@ export default function EmailAutomationPanel() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<AutomationStatus | "all">("all");
   const [detail, setDetail] = useState<EmailAutomationLead | null>(null);
+
+  // Duplicate-email confirm (#9). Email is the dedup key; names may repeat.
+  const [dupPrompt, setDupPrompt] = useState<{
+    name: string;
+    email: string;
+    language: AutomationLanguage;
+    matches: EmailAutomationLead[];
+  } | null>(null);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -126,7 +144,7 @@ export default function EmailAutomationPanel() {
     });
   }, [leads, search, statusFilter]);
 
-  async function addLead() {
+  function addLead() {
     const name = businessName.trim();
     const email = businessEmail.trim();
     if (!name) {
@@ -138,11 +156,25 @@ export default function EmailAutomationPanel() {
       return;
     }
 
+    // Dedup on email only (names may legitimately repeat). If this email is
+    // already in the list, confirm before adding a duplicate.
+    const matches = leads.filter(
+      (l) => l.business_email.toLowerCase() === email.toLowerCase(),
+    );
+    if (matches.length > 0) {
+      setDupPrompt({ name, email, language, matches });
+      return;
+    }
+
+    insertLead(name, email, language);
+  }
+
+  async function insertLead(name: string, email: string, lang: AutomationLanguage) {
     setSaving(true);
     const { error } = await (supabase as any).from(TABLE).insert({
       business_name: name,
       business_email: email,
-      language,
+      language: lang,
       status: "NOT_SENT",
       created_by: actorUserId,
     });
@@ -223,11 +255,6 @@ export default function EmailAutomationPanel() {
               {saving ? "Adding…" : "Add lead"}
             </Button>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Subject line will be written in <span className="font-medium">{language}</span>; the email body is always
-            English. New leads start as <span className="font-medium">NOT_SENT</span> and are picked up by the
-            09:00 / 12:05 / 15:00 IST campaigns.
-          </p>
         </CardContent>
       </Card>
 
@@ -271,8 +298,64 @@ export default function EmailAutomationPanel() {
         </Button>
       </div>
 
-      {/* Table */}
-      <Card>
+      {/* Mobile: card list */}
+      <div className="space-y-3 md:hidden">
+        {loading ? (
+          <Card>
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">Loading leads…</CardContent>
+          </Card>
+        ) : filtered.length === 0 ? (
+          <Card>
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+              No leads yet. Add a business above to start outreach.
+            </CardContent>
+          </Card>
+        ) : (
+          filtered.map((lead) => (
+            <Card key={lead.id}>
+              <CardContent className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{lead.business_name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{lead.business_email}</p>
+                  </div>
+                  <StatusBadge status={lead.status} />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <p>
+                    <span className="text-muted-foreground">Language:</span> {lead.language}
+                  </p>
+                  <p className="truncate">
+                    <span className="text-muted-foreground">Industry:</span> {lead.industry ?? "—"}
+                  </p>
+                  <p className="col-span-2">
+                    <span className="text-muted-foreground">Added:</span>{" "}
+                    {new Date(lead.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex justify-end gap-1 border-t pt-2">
+                  <Button variant="ghost" size="sm" className="h-8" onClick={() => setDetail(lead)}>
+                    <Eye className="mr-1.5 h-4 w-4" />
+                    View
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-destructive hover:text-destructive"
+                    onClick={() => deleteLead(lead)}
+                  >
+                    <Trash2 className="mr-1.5 h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <Card className="hidden md:block">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -409,15 +492,74 @@ export default function EmailAutomationPanel() {
                   </section>
                 )}
 
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <section>
+                  <h4 className="mb-1 font-semibold">Engagement</h4>
+                  <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3 text-xs">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      <span><span className="text-muted-foreground">Opens:</span> {detail.open_count ?? 0}</span>
+                      <span><span className="text-muted-foreground">Clicks:</span> {detail.click_count ?? 0}</span>
+                      {detail.confidence != null && (
+                        <span><span className="text-muted-foreground">Confidence:</span> {detail.confidence}/100</span>
+                      )}
+                      {detail.personalization_mode && (
+                        <span><span className="text-muted-foreground">Email:</span> {detail.personalization_mode}</span>
+                      )}
+                    </div>
+                    <p><span className="text-muted-foreground">Delivered:</span> {detail.delivered_at ? new Date(detail.delivered_at).toLocaleString() : "—"}</p>
+                    <p><span className="text-muted-foreground">Opened:</span> {detail.opened_at ? new Date(detail.opened_at).toLocaleString() : "—"}</p>
+                    <p><span className="text-muted-foreground">Clicked:</span> {detail.clicked_at ? new Date(detail.clicked_at).toLocaleString() : "—"}</p>
+                    {detail.bounced_at && (
+                      <p className="text-rose-600"><span className="text-muted-foreground">Bounced:</span> {new Date(detail.bounced_at).toLocaleString()}</p>
+                    )}
+                  </div>
+                </section>
+
+                <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground sm:grid-cols-2">
                   <p>Sent: {detail.sent_at ? new Date(detail.sent_at).toLocaleString() : "—"}</p>
-                  <p>Message ID: {detail.provider_message_id ?? "—"}</p>
+                  <p className="break-all">Message ID: {detail.provider_message_id ?? "—"}</p>
                 </div>
               </div>
             </>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Duplicate-email confirm (#9): email already exists — confirm re-add. */}
+      <AlertDialog open={!!dupPrompt} onOpenChange={(o) => !o && setDupPrompt(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This email is already added</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  <span className="font-medium">{dupPrompt?.email}</span> is already in the list
+                  {dupPrompt && dupPrompt.matches.length > 1 ? ` (${dupPrompt.matches.length} times)` : ""}:
+                </p>
+                <ul className="space-y-1 rounded-md border bg-muted/30 p-2 text-xs">
+                  {dupPrompt?.matches.map((m) => (
+                    <li key={m.id} className="flex items-center justify-between gap-2">
+                      <span className="font-medium">{m.business_name}</span>
+                      <span>{STATUS_META[m.status].label}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p>Add it again anyway?</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (dupPrompt) insertLead(dupPrompt.name, dupPrompt.email, dupPrompt.language);
+                setDupPrompt(null);
+              }}
+            >
+              Add anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

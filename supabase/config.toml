@@ -8,3 +8,11 @@ verify_jwt = false
 
 [functions.poll-replies]
 verify_jwt = false
+
+# Tracking endpoints are hit by recipients' mail clients / browsers (no auth),
+# so JWT verification must be off. They only record opens/clicks by lead id.
+[functions.track-open]
+verify_jwt = false
+
+[functions.track-click]
+verify_jwt = false

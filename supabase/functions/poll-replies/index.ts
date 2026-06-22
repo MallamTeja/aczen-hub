@@ -1,9 +1,12 @@
 // poll-replies — reply monitoring (no AI).
 //
-// Invoked by pg_cron at 09:00 / 12:05 / 15:00 IST. Reads the Zoho inbox, matches
-// each message's sender against leads we have emailed, and flips matched leads to
-// GOT_RESPONSE with the reply body/date/thread. Uses a high-water cursor stored
-// in outreach_control.reply_cursor so old mail isn't reprocessed.
+// Invoked by pg_cron at 09:00 / 12:05 / 15:00 IST. Reads the Zoho inbox and, for
+// each new message, decides:
+//   • BOUNCE      → suppress the address (#5) so we never email it again.
+//   • AUTO-REPLY  → ignore (out-of-office etc. is NOT a real response).
+//   • REAL REPLY  → match to a lead (by thread first, then sender) and flip it to
+//                   GOT_RESPONSE, which the DB trigger promotes into the CRM.
+// A high-water cursor (outreach_control.reply_cursor) avoids reprocessing old mail.
 import { getAdminClient } from "../_shared/supabaseAdmin.ts";
 import {
   getAccessToken,
@@ -24,6 +27,32 @@ function extractEmail(addr: string): string {
   return (m ? m[1] : addr).trim().toLowerCase();
 }
 
+// A delivery-failure / bounce message (so we can suppress the address).
+function isBounce(from: string, subject: string): boolean {
+  return (
+    /mailer-daemon|postmaster|mail-?delivery|delivery-?status|no-?reply@.*(mail|smtp)/i.test(from) ||
+    /undeliverable|delivery (status notification|has failed|failure|incomplete)|returned mail|mail delivery (failed|subsystem)|failure notice|could not be delivered/i.test(
+      subject,
+    )
+  );
+}
+
+// An automated away-message — interest signal of zero, do not treat as a reply.
+function isAutoReply(subject: string): boolean {
+  return /out of (the )?office|automatic reply|auto-?reply|autoresponse|away from (my )?(desk|email)|on (vacation|leave|holiday)/i.test(
+    subject,
+  );
+}
+
+// Find which awaiting-lead address a bounce message refers to, by scanning text.
+function findAwaitingEmail(text: string, emails: Iterable<string>): string | null {
+  const t = text.toLowerCase();
+  for (const e of emails) {
+    if (e && t.includes(e)) return e;
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   const secret = Deno.env.get("CRON_SECRET");
   if (secret && req.headers.get("x-cron-secret") !== secret) {
@@ -35,16 +64,26 @@ Deno.serve(async (req) => {
   // Leads we are waiting on (already emailed, not yet replied).
   const { data: leads } = await supabase
     .from("email_automation_leads")
-    .select("id,business_email,sent_at,status")
+    .select("id,business_email,sent_at,status,provider_thread_id")
     .in("status", ["SENT", "FOLLOWED_UP"]);
 
   if (!leads || leads.length === 0) {
     return json({ status: "ok", matched: 0, message: "no leads awaiting replies" });
   }
 
-  // email -> lead (lowercased)
-  const byEmail = new Map<string, (typeof leads)[number]>();
-  for (const l of leads) byEmail.set(String(l.business_email).toLowerCase(), l);
+  type LeadRow = (typeof leads)[number];
+  // Match indexes: by sender email and by Zoho thread id.
+  const byEmail = new Map<string, LeadRow>();
+  const byThread = new Map<string, LeadRow>();
+  for (const l of leads) {
+    byEmail.set(String(l.business_email).toLowerCase(), l);
+    if (l.provider_thread_id) byThread.set(String(l.provider_thread_id), l);
+  }
+  // Stop matching a lead once handled (remove from both indexes).
+  const forget = (l: LeadRow) => {
+    byEmail.delete(String(l.business_email).toLowerCase());
+    if (l.provider_thread_id) byThread.delete(String(l.provider_thread_id));
+  };
 
   // Cursor (high-water mark) so we only look at new mail.
   const { data: control } = await supabase
@@ -73,6 +112,8 @@ Deno.serve(async (req) => {
   const messages = await listInboxMessages(token, folderId, 50);
 
   let matched = 0;
+  let bounced = 0;
+  let ignored = 0;
   let maxSeen = cursorMs;
 
   for (const msg of messages) {
@@ -80,7 +121,41 @@ Deno.serve(async (req) => {
     if (msg.receivedTime <= cursorMs) continue; // already processed
 
     const from = extractEmail(msg.fromAddress);
-    const lead = byEmail.get(from);
+    const subject = msg.subject || "";
+
+    // 1. Bounce → suppress the affected address (#5).
+    if (isBounce(from, subject)) {
+      let target = findAwaitingEmail(`${subject}\n${msg.summary ?? ""}`, byEmail.keys());
+      if (!target) {
+        // Bounce bodies usually name the failed recipient — fetch & scan.
+        try {
+          const content = await getMessageContent(token, folderId, msg.messageId);
+          target = findAwaitingEmail(content, byEmail.keys());
+        } catch {
+          target = null;
+        }
+      }
+      if (target) {
+        const lead = byEmail.get(target);
+        await supabase.rpc("suppress_email", {
+          p_email: target,
+          p_reason: `bounce: ${subject}`.slice(0, 200),
+        });
+        if (lead) forget(lead);
+        bounced++;
+      }
+      continue;
+    }
+
+    // 2. Automated away-message → not a real reply.
+    if (isAutoReply(subject)) {
+      ignored++;
+      continue;
+    }
+
+    // 3. Real reply — match by thread first, then by sender address (#4).
+    const lead =
+      (msg.threadId ? byThread.get(String(msg.threadId)) : undefined) ?? byEmail.get(from);
     if (!lead) continue;
 
     // Reply must arrive after we sent (guards against pre-existing mail).
@@ -102,13 +177,12 @@ Deno.serve(async (req) => {
         status: "GOT_RESPONSE",
         reply_body: (body || "(reply received)").slice(0, 4000),
         reply_date: new Date(msg.receivedTime).toISOString(),
-        provider_thread_id: msg.threadId ?? null,
+        provider_thread_id: msg.threadId ?? lead.provider_thread_id ?? null,
       })
       .eq("id", lead.id);
 
     matched++;
-    // Don't match this lead again in the same run.
-    byEmail.delete(from);
+    forget(lead);
   }
 
   // Advance the cursor.
@@ -119,5 +193,5 @@ Deno.serve(async (req) => {
       .eq("id", 1);
   }
 
-  return json({ status: "ok", scanned: messages.length, matched });
+  return json({ status: "ok", scanned: messages.length, matched, bounced, ignored });
 });

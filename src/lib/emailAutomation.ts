@@ -34,6 +34,10 @@ export type EmailAutomationLead = {
   summary: string | null;
   pain_points: string[] | null;
 
+  // Research confidence (0-100) + which email path was chosen (#6).
+  confidence: number | null;
+  personalization_mode: "personalized" | "generic" | null;
+
   email_subject: string | null;
   email_body: string | null;
   email_generated_at: string | null;
@@ -41,11 +45,22 @@ export type EmailAutomationLead = {
   provider_message_id: string | null;
   provider_thread_id: string | null;
   sent_at: string | null;
+  delivered_at: string | null;
   last_attempt_at: string | null;
   failure_reason: string | null;
 
+  // Funnel tracking (#8 / BMP #3).
+  opened_at: string | null;
+  open_count: number;
+  clicked_at: string | null;
+  click_count: number;
+  bounced_at: string | null;
+
   reply_body: string | null;
   reply_date: string | null;
+
+  // Set when a reply auto-promotes the lead into the sales CRM ((c)).
+  crm_lead_id: string | null;
 
   created_by: string;
   created_at: string;

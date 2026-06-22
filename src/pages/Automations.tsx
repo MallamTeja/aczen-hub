@@ -16,14 +16,14 @@ export default function Automations() {
         </div>
 
         <Tabs defaultValue="email" className="space-y-4">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-2 sm:inline-flex sm:w-auto">
             <TabsTrigger value="email" className="gap-1.5">
-              <Mail className="h-3.5 w-3.5" />
-              Email Automation
+              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Email Automation</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-1.5">
-              <BarChart3 className="h-3.5 w-3.5" />
-              Analytics
+              <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Analytics</span>
             </TabsTrigger>
           </TabsList>
 
